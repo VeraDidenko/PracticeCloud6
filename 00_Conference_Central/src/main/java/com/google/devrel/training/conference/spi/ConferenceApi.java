@@ -17,7 +17,6 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.users.User;
-import com.google.appengine.repackaged.com.google.api.client.util.store.DataStore;
 import com.google.devrel.training.conference.Constants;
 import com.google.devrel.training.conference.domain.Conference;
 import com.google.devrel.training.conference.domain.Profile;
@@ -232,7 +231,9 @@ public class ConferenceApi {
         if (user == null) {
             throw new UnauthorizedException("Authorization required");
         }
-        Query<Conference> query = ofy().load().type(Conference.class).ancestor(user.getUserId());
+        String userId = user.getUserId();
+        Key<Profile> profileKey = Key.create(Profile.class,userId);
+        Query<Conference> query = ofy().load().type(Conference.class).ancestor(profileKey);
         return query.list();
     }
     
@@ -454,33 +455,6 @@ public class ConferenceApi {
 
         return listOfConferenceEntities;  // change this - DONE
     }
-    /**
-     * Register to attend the specified Conference.
-     *
-     * @param user An user who invokes this method, null when the user is not signed in.
-     * @param websafeConferenceKey The String representation of the Conference Key.
-     * @return Boolean true when success, otherwise false
-     * @throws UnauthorizedException when the user is not signed in.
-     * @throws NotFoundException when there is no Conference with the given conferenceId.
-
-    @ApiMethod(
-            name = "unregisterFromConference",
-            path = "conference/{websafeConferenceKey}/unregistration",
-            httpMethod = HttpMethod.POST
-    )
-
-    public void unregisterFromConference_SKELETON(final User user,
-            @Named("websafeConferenceKey") final String websafeConferenceKey)
-            throws UnauthorizedException, NotFoundException
-    {
-        // If not signed in, throw a 401 error.
-        if (user == null) {
-            throw new UnauthorizedException("Authorization required");
-        }
-        // Get the userId
-        Profile profile = getProfileFromUser(user);
-        profile.unregisterFromConference(websafeConferenceKey);
-    } */
     
     /**     
     * Unregister from the specified Conference.     *     
@@ -492,7 +466,7 @@ public class ConferenceApi {
     */   
     @ApiMethod( 
     name = "unregisterFromConference", 
-    path = "conference/{websafeConferenceKey}/registration",
+    path = "conference/{websafeConferenceKey}/unregistration",
      httpMethod = HttpMethod.DELETE)    
     public WrappedBoolean unregisterFromConference(final User user, @Named("websafeConferenceKey") final String websafeConferenceKey)throws UnauthorizedException{
     	// If not signed in, throw a 401 error.
