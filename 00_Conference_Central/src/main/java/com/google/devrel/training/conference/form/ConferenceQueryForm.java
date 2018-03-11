@@ -197,17 +197,4 @@ public class ConferenceQueryForm {
         LOG.info(query.toString());
         return query;
     }
-    public List<Conference> queryConferences(ConferenceQueryForm conferenceQueryForm ) {
-    	Iterable<Conference> conferenceIterable = conferenceQueryForm.getQuery(); 
-    	List<Conference> result = new ArrayList<>(0); 
-    	List<Key<Profile>> organizersKeyList = new ArrayList<>(0); 
-    	for (Conference conference : conferenceIterable){ 
-    	organizersKeyList.add(Key.create(Profile.class, conference.getOrganizerUserId())); 
-    	result.add(conference); 
-    	} 
-    	// To avoid separate datastore gets for each Conference, pre-fetch the Profiles. 
-    	ofy().load().keys(organizersKeyList); 
-    	return result;
-    }
-    
 }

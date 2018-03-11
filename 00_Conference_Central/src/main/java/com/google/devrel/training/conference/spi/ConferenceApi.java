@@ -21,6 +21,7 @@ import com.google.devrel.training.conference.Constants;
 import com.google.devrel.training.conference.domain.Conference;
 import com.google.devrel.training.conference.domain.Profile;
 import com.google.devrel.training.conference.form.ConferenceForm;
+import com.google.devrel.training.conference.form.ConferenceQueryForm;
 import com.google.devrel.training.conference.form.ProfileForm;
 import com.google.devrel.training.conference.form.ProfileForm.TeeShirtSize;
 import com.googlecode.objectify.Key;
@@ -217,11 +218,47 @@ public class ConferenceApi {
             path = "queryConferences",
             httpMethod = HttpMethod.POST
     )
-    public List<Conference> queryConferences() {
+    public List queryConferences(ConferenceQueryForm conferenceQueryForm) { 
+    	Iterable<Conference> conferenceIterable = conferenceQueryForm.getQuery(); 
+    	List<Conference> result = new ArrayList<>(0); 
+    	List<Key<Profile>> organizersKeyList = new ArrayList<>(0); 
+    	for (Conference conference : conferenceIterable) { 
+	    	organizersKeyList.add(Key.create(Profile.class, conference.getOrganizerUserId())); 
+	    	result.add(conference); 
+    	} 
+    	// To avoid separate datastore gets for each Conference, pre-fetch the Profiles. 
+    	ofy().load().keys(organizersKeyList); 
+    	return result; 
+    }
+    @ApiMethod(
+            name = "filterPlayground",
+            path = "filterPlayground",
+            httpMethod = HttpMethod.POST
+    )
+    public List<Conference> filterPlayground() {
         Query<Conference> query = ofy().load().type(Conference.class).order("name");
+
+        // Filter on city
+        query = query.filter("city =", "London");
+
+        // Add a filter for topic = "Medical Innovations"
+        query = query.filter("topics =", "Medical Innovations");
+
+        // Add a filter for maxAttendees
+        query = query.filter("maxAttendees >", 8);
+        query = query.filter("maxAttendees <", 10).order("maxAttendees").order("name");
+
+        // Add a filter for month {unindexed composite query}
+        // Find conferences in June
+        query = query.filter("month =", 6);
+
+        // multiple sort orders
+        query = query.filter("city =", "Tokyo").filter("seatsAvailable <", 10).
+                filter("seatsAvailable >" , 0).order("seatsAvailable").order("name").
+                order("month");
+
         return query.list();
     }
-    
     @ApiMethod(
             name = "getConferencesCreated",
             path = "getConferencesCreated",
