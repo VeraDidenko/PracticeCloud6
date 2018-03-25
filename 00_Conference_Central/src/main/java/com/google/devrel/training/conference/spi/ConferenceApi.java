@@ -220,8 +220,9 @@ public class ConferenceApi {
 		// Save Conference and Profile Entities
 		ofy().save().entities(conference, profile).now();
 		Queue queue = QueueFactory.getDefaultQueue();
-		queue.add(TaskOptions.Builder.withUrl("/email-queue").param(profile.getDisplayName(), profile.getMainEmail()).param(conference.getName(), conference.getDescription()));
-
+		StringBuilder conferenceInfo = new StringBuilder();
+		conferenceInfo.append("Name: ").append(conference.getName()).append("\nDescription: ").append(conference.getDescription()).append("\nCity: ").append(conference.getCity()).append("\nDuration: ").append(conference.getStartDate()).append(" - ").append(conference.getEndDate()).append("\nMax attendees: ").append(conference.getMaxAttendees());;
+		queue.add(TaskOptions.Builder.withUrl("/email-queue").param("email", user.getEmail()).param("conferenceInfo", conferenceInfo.toString()));
 		return conference;
 	}
 

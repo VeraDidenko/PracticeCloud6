@@ -33,7 +33,7 @@ public class SendConfirmationEmailServlet extends HttpServlet {
         String conferenceInfo = request.getParameter("conferenceInfo");
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
-        String body = "Hi, you have created a following conference.\n" + conferenceInfo;
+        String body = "Hi, you have created the following conference.\n" + conferenceInfo;
         try {
             Message message = new MimeMessage(session);
             InternetAddress from = new InternetAddress(

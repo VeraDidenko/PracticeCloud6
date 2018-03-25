@@ -31,12 +31,12 @@ public class SetAnnouncementServlet extends HttpServlet {
 
         // TODO
         // Query for conferences with less than 5 seats left
-        Iterable<Conference> iterable = ofy().load().type(Conference.class).filter("seatsAvailable <", 5).filter("seatsAvailable >", 0);
+    	Iterable<Conference> iterable = ofy().load().type(Conference.class).filter("seatsAvailable <", 5);
 
         // TODO
         // Iterate over the conferences with less than 5 seats less
         // and get the name of each one
-        List<String> conferenceNames = new ArrayList<>(0);
+        List<String> conferenceNames = new ArrayList<>();
         for (Conference conference : iterable) {
             conferenceNames.add(conference.getName());
         }
